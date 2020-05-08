@@ -129,20 +129,11 @@ def add_data(year,month,day,kwh,fuel_charge,bill):
     data = get_data()
     JD = data['Julian Dates']
     if JD[len(JD)-1] > julian_date:
-        return add_old_data(year,month,day,kwh,fuel_charge,bill)
+        return add_old_data(date,julian_date,kwh,fuel_charge,bill)
     else:
-        return add_new_data(year,month,day,kwh,fuel_charge,bill)
+        return add_new_data(date,julian_date,kwh,fuel_charge,bill)
 
-def add_old_data(year,month,day,kwh,fuel_charge,bill):
-    year = int(year)
-    month = int(month)
-    day = int(day)
-    date = pd.Timestamp(year, month, day)
-    hour = 0
-    minute = 0
-    second = 0
-    julian_date = 367 * year - math.floor((7 * (year + math.floor((month + 9) / 12))) / 4) + math.floor(
-        275 * month / 9) + day + 1721013.5 + (1 / 24) * (hour + (1 / 60) * (minute + second / 60))
+def add_old_data(date,julian_date,kwh,fuel_charge,bill):
     data = get_data()
     JD = data['Julian Dates']
     counter_1 = 0
@@ -156,16 +147,7 @@ def add_old_data(year,month,day,kwh,fuel_charge,bill):
             final_data.to_csv('Current_data.csv', index=False)
             return final_data.to_string()
 
-def add_new_data(year,month,day,kwh,fuel_charge,bill):
-    year = int(year)
-    month = int(month)
-    day = int(day)
-    date = pd.Timestamp(year, month, day)
-    hour = 0
-    minute = 0
-    second = 0
-    julian_date = 367 * year - math.floor((7 * (year + math.floor((month + 9) / 12))) / 4) + math.floor(
-        275 * month / 9) + day + 1721013.5 + (1 / 24) * (hour + (1 / 60) * (minute + second / 60))
+def add_new_data(date,julian_date,kwh,fuel_charge,bill):
     data = get_data()
     modified_data = data.append({'Date': date, 'Average kWh': kwh, 'Fuel Charge (Cents/kWh)': fuel_charge, 'Average Bill': bill, 'Julian Dates': julian_date}, ignore_index=True)
     modified_data.to_csv('Current_data.csv', index=False)

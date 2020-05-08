@@ -16,12 +16,17 @@ def home():
     return 'Hello World'
 
 def get_data():
-    file_exists = os.path.exists(Current_data.csv)
+    file_exists = os.path.exists("Current_data.csv")
     if file_exists == 0:
         data = data_collector.obtain_data()
     else:
         data = pd.read_csv(r'C:\UT\Spring 2020\software Class\Final\Current_data.csv')
     return data
+
+def reset_data():
+    data = data_collector.obtain_data()
+    data.to_csv('Current_data.csv', index=False)
+    return
 
 def get_counters(JD1, JD2):
     JD1 = float(JD1)
@@ -122,9 +127,54 @@ def add_data(year,month,day,kwh,fuel_charge,bill):
     julian_date = 367 * year - math.floor((7 * (year + math.floor((month + 9) / 12))) / 4) + math.floor(
         275 * month / 9) + day + 1721013.5 + (1 / 24) * (hour + (1 / 60) * (minute + second / 60))
     data = get_data()
+    JD = data['Julian Dates']
+    if JD[len(JD)-1] > julian_date:
+        return add_old_data(year,month,day,kwh,fuel_charge,bill)
+    else:
+        return add_new_data(year,month,day,kwh,fuel_charge,bill)
+
+def add_old_data(year,month,day,kwh,fuel_charge,bill):
+    year = int(year)
+    month = int(month)
+    day = int(day)
+    date = pd.Timestamp(year, month, day)
+    hour = 0
+    minute = 0
+    second = 0
+    julian_date = 367 * year - math.floor((7 * (year + math.floor((month + 9) / 12))) / 4) + math.floor(
+        275 * month / 9) + day + 1721013.5 + (1 / 24) * (hour + (1 / 60) * (minute + second / 60))
+    data = get_data()
+    JD = data['Julian Dates']
+    counter_1 = 0
+    for objects in JD:
+        counter_1 = counter_1 + 1
+        if objects >= julian_date:
+            data_upper = data.iloc[0:(counter_1-1)]
+            data_lower = data.iloc[counter_1-1:len(data)]
+            modified_data = data_upper.append({'Date': date, 'Average kWh': kwh, 'Fuel Charge (Cents/kWh)': fuel_charge, 'Average Bill': bill, 'Julian Dates': julian_date}, ignore_index=True)
+            final_data = modified_data.append(data_lower)
+            final_data.to_csv('Current_data.csv', index=False)
+            return final_data.to_string()
+
+def add_new_data(year,month,day,kwh,fuel_charge,bill):
+    year = int(year)
+    month = int(month)
+    day = int(day)
+    date = pd.Timestamp(year, month, day)
+    hour = 0
+    minute = 0
+    second = 0
+    julian_date = 367 * year - math.floor((7 * (year + math.floor((month + 9) / 12))) / 4) + math.floor(
+        275 * month / 9) + day + 1721013.5 + (1 / 24) * (hour + (1 / 60) * (minute + second / 60))
+    data = get_data()
     modified_data = data.append({'Date': date, 'Average kWh': kwh, 'Fuel Charge (Cents/kWh)': fuel_charge, 'Average Bill': bill, 'Julian Dates': julian_date}, ignore_index=True)
     modified_data.to_csv('Current_data.csv', index=False)
     return modified_data.to_string()
+
+@app.route('/reset_data_route',methods=['POST'])
+def reset_data_route():
+    reset_data()
+    return 'Data Reset'
 
 if __name__ == '__main__':
     app.run()

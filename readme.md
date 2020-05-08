@@ -1,6 +1,6 @@
 # COE332 FINAL PROJECT
 ### By Tedham Anderson, Corey Finnigan and Juan Martinez
-========================================================
+======
 
 1. **Purpose of this Project:** This project looks at the average residential monthly energy bills, 
 focusing on cost based on kWh consumption. We chose to look at this data based on its availability
